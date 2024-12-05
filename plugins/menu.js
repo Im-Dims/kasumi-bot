@@ -29,7 +29,7 @@ let handler = async (m, { usedPrefix: _p, command, text, args, setting }) => {
         before: `Oh hi %tag!⁩ 👋
 I am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.
 
-> ◎ *Library* : Baileys
+> ◎ *Library* : Baileys ${await Func.getBaileys('./package.json')}
 > ◎ *Version* : ${require('../package.json').version}
 > ◎ *Rest API* : https://api.ssateam.my.id
 > ◎ *Source* : https://github.com/Im-Dims/kasumi-bot
@@ -243,7 +243,7 @@ If you find an error or want to upgrade premium plan contact the owner.
       if (teks == '404') {
         let caption = `Oh hi @${m.sender.replace(/@.+/g, '')}👋!\n`
         caption += `I am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.\n\n`
-        caption += `> ◎ *Library* : Baileys\n`
+        caption += `> ◎ *Library* : Baileys ${await Func.getBaileys('./package.json')}\n`
         caption += `> ◎ *Version* : ${require('../package.json').version}\n`
         caption += `> ◎ *Rest API* : https://api.ssateam.my.id\n`
         caption += `> ◎ *Source* : https://github.com/Im-Dims/kasumi-bot\n\n`
@@ -268,7 +268,7 @@ If you find an error or want to upgrade premium plan contact the owner.
       /*if (teks == '404' && m.isGroup) {
         let caption = `Oh hi @${m.sender.replace(/@.+/g, '')}👋!\n`
         caption += `I am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.\n\n`
-        caption += `> ◎ *Library* : Baileys\n`
+        caption += `> ◎ *Library* : Baileys ${await Func.getBaileys('./package.json')}\n`
         caption += `> ◎ *Version* : ${require('../package.json').version}\n`
         caption += `> ◎ *Rest API* : https://api.ssateam.my.id\n`
         caption += `> ◎ *Source* : https://github.com/Im-Dims/kasumi-bot\n\n`
@@ -296,7 +296,7 @@ If you find an error or want to upgrade premium plan contact the owner.
       } else if (teks == '404' && !m.isGroup) {
         let caption = `Oh hi @${m.sender.replace(/@.+/g, '')}👋!\n`
         caption += `I am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.\n\n`
-        caption += `> ◎ *Library* : Baileys\n`
+        caption += `> ◎ *Library* : Baileys ${await Func.getBaileys('./package.json')}\n`
         caption += `> ◎ *Version* : ${require('../package.json').version}\n`
         caption += `> ◎ *Rest API* : https://api.ssateam.my.id\n`
         caption += `> ◎ *Source* : https://github.com/Im-Dims/kasumi-bot\n\n`
