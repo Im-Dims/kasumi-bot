@@ -6,7 +6,7 @@
     makeInMemoryStore,
     jidNormalizedUser,
     makeCacheableSignalKeyStore,
-    PHONENUMBER_MCC,
+    /*PHONENUMBER_MCC,*/
     fetchLatestBaileysVersion,
     proto,
     Browsers,
@@ -137,7 +137,7 @@
     groupMetadata: conn.groupMetadata 
   })
   
-  if (opts.pairing && !conn.authState.creds.registered) {
+  /*if (opts.pairing && !conn.authState.creds.registered) {
     let PhoneNumber
     if (!!global.pairingNumber) {
       PhoneNumber = global.pairingNumber.toString().replace(/[^0-9]/g, '')
@@ -160,7 +160,7 @@
       code = code?.["match"](/.{1,4}/g)?.["join"]('-') || code
       console.log(chalk.black(chalk.bgGreen("Your Pairing Code : ")), chalk.black(chalk.white(code)))
     }, 3000)
-  }
+  }*/
   
   if (!opts.test) {
     if (global.db) {
