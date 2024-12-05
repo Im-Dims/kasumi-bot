@@ -125,7 +125,7 @@
       keys: makeCacheableSignalKeyStore(state.keys, Logger)
     },
     browser: ["Ubuntu", "Chrome", "20.0.04"],
-    printQRInTerminal: !opts.pairing,
+    printQRInTerminal: /*!opts.pairing*/ true,
     defaultQueryTimeoutMs: undefined,
     isLatest: true, // set the correct value for isLatest 
     markOnlineOnConnect: true,
