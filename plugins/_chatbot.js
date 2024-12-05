@@ -2,9 +2,10 @@ let handler = m => m
 handler.all = async function (m) {
   if (m.isBaileys || m.sender === m.chat) return
   const budy = m.text || ''
+  const bot = await conn.user.jid.replace('@s.whatsapp.net', '')
   if (!conn.chatbot) conn.chatbot = {}
-  if (budy.includes('@27604645682')) {
-    const ya = budy.replace('@27604645682', '').trim()
+  if (budy.includes('@' + bot)) {
+    const ya = budy.replace('@' + bot, '').trim()
     if (ya) {
       try {
         const Groq = require('groq-sdk')
