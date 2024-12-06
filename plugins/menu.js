@@ -1,321 +1,252 @@
-let fs = require('fs')
-let path = require('path')
-let levelling = require('../lib/levelling')
-let moment = require('moment-timezone')
+const fs = require('fs')
 
-let handler = async (m, { usedPrefix: _p, command, text, args, setting }) => {
-  try {
-    conn.menu = conn.menu ? conn.menu : {}
-    const style = setting.style
-    if (style === 1) {
-      let tags = {
-        anonymous: 'A N O N Y M O U S',
-        database: 'D A T A B A S E',
-        downloader: 'D O W N L O A D E R',
-        effect: 'E F F E C T',
-        fun: 'F U N',
-        game: 'G A M E',
-        group: 'G R O U P',
-        info: 'I N F O',
-        internet: 'I N T E R N E T',
-        maker: 'M A K E R',
-        owner: 'O W N E R',
-        sticker: 'S T I C K E R',
-        tools: 'T O O L S',
-        xp: 'U S E R I N F O',
-        voice: 'V O I C E',
-      }
-      const defaultMenu = {
-        before: `Oh hi %tag!⁩ 👋
-I am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.
-
-> ◎ *Library* : Baileys ${await Func.getBaileys('./package.json')}
-> ◎ *Version* : ${require('../package.json').version}
-> ◎ *Rest API* : https://api.ssateam.my.id
-> ◎ *Source* : https://github.com/Im-Dims/kasumi-bot
-
-If you find an error or want to upgrade premium plan contact the owner.
-%readmore`.trimStart(),
-        header: '乂  *%category*\n\n┌────',
-        body: '│  ◦  %cmd',
-        footer: '└────\n',
-        after: global.set.footer,
-      }
-      let package = JSON.parse(await fs.promises.readFile(path.join(__dirname, '../package.json')).catch(_ => '{}'))
-      let { exp, limit, level, role } = global.db.data.users[m.sender]
-      let { min, xp, max } = levelling.xpRange(level, global.multiplier)
-      let name = conn.getName(m.sender)
-      let d = new Date(new Date + 3600000)
-      let locale = 'id'
-      // d.getTimeZoneOffset()
-      // Offset -420 is 18.00
-      // Offset    0 is  0.00
-      // Offset  420 is  7.00
-      let weton = ['Pahing', 'Pon', 'Wage', 'Kliwon', 'Legi'][Math.floor(d / 84600000) % 5]
-      let week = d.toLocaleDateString(locale, { weekday: 'long' })
-      let date = d.toLocaleDateString(locale, {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-      let dateIslamic = Intl.DateTimeFormat(locale + '-TN-u-ca-islamic', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      }).format(d)
-      let time = d.toLocaleTimeString(locale, {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric'
-      })
-      let _uptime = process.uptime() * 1000
-      let _muptime
-      if (process.send) {
-        process.send('uptime')
-        _muptime = await new Promise(resolve => {
-          process.once('message', resolve)
-          setTimeout(resolve, 1000)
-        }) * 1000
-      }
-      let muptime = clockString(_muptime)
-      let uptime = clockString(_uptime)
-      let totalreg = Object.keys(global.db.data.users).length
-      let rtotalreg = Object.values(global.db.data.users).filter(user => user.registered == true).length
-      let help = Object.values(global.plugins).filter(plugin => !plugin.disabled).map(plugin => {
-        return {
-          help: Array.isArray(plugin.tags) ? plugin.help : [plugin.help],
-          tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
-          prefix: 'customPrefix' in plugin,
-          limit: plugin.limit,
-          premium: plugin.premium,
-          enabled: !plugin.disabled,
-        }
-      })
-      for (let plugin of help)
-        if (plugin && 'tags' in plugin)
-          for (let tag of plugin.tags)
-            if (!(tag in tags) && tag) tags[tag] = tag
+module.exports = {
+  run: async (m, { conn, usedPrefix: _p, command, text, args, setting }) => {
+    try {
       conn.menu = conn.menu ? conn.menu : {}
-      let before = conn.menu.before || defaultMenu.before
-      let header = conn.menu.header || defaultMenu.header
-      let body = conn.menu.body || defaultMenu.body
-      let footer = conn.menu.footer || defaultMenu.footer
-      let after = conn.menu.after || (conn.user.jid == global.conn.user.jid ? '' : `Powered by https://wa.me/${global.conn.user.jid.split`@`[0]}`) + defaultMenu.after
-      let _text = [
-        before,
-        ...Object.keys(tags).map(tag => {
-          return header.replace(/%category/g, tags[tag]) + '\n' + [
-            ...help.filter(menu => menu.tags && menu.tags.includes(tag) && menu.help).map(menu => {
-              return menu.help.map(help => {
-                return body.replace(/%cmd/g, menu.prefix ? help : '%p' + help)
-                  .replace(/%islimit/g, menu.limit ? 'Ⓛ' : '')
-                  .replace(/%isPremium/g, menu.premium ? 'Ⓟ' : '')
-                  .trim()
-              }).join('\n')
-            }),
-            footer
-          ].join('\n')
-        }),
-        after
-      ].join('\n')
-      text = typeof conn.menu == 'string' ? conn.menu : typeof conn.menu == 'object' ? _text : ''
-      let replace = {
-        '%': '%', p: _p, uptime, muptime, me: conn.user.name, tag: `@${m.sender.replace(/@.+/g, '')}`, npmname: package.name, npmdesc: package.description, version: package.version, exp: exp - min, maxexp: xp, totalexp: exp, xp4levelup: max - exp, github: package.homepage ? package.homepage.url || package.homepage : '[unknown github url]', level, limit, name, weton, week, date, dateIslamic, time, totalreg, rtotalreg, role, readmore: readMore
-      }
-      text = text.replace(new RegExp(`%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`, 'g'), (_, name) => '' + replace[name])
-      conn.sendMessageModify(m.chat, text.trim(), m, {
-        largeThumb: true,
-        url: setting.link
-      })
-    } else if (style === 2) {
-      const defaultMenu = {
-        before: ``.trimStart(),
-        header: '',
-        body: `◦ %cmd %isPremium`,
-        footer: '',
-        after: ``,
-      }
-      let tags
-      let teks = `${args[0]}`.toLowerCase()
-      let arrayMenu = ['anonymous', 'database', 'downloader', 'effect', 'fun', 'game', 'group', 'info', 'internet', 'maker', 'owner', 'sticker', 'tools', 'xp', 'voice']
-      if (!arrayMenu.includes(teks)) teks = '404'
-      if (teks == 'anonymous') tags = {
-        anonymous: 'ANONYMOUS'
-      }
-      if (teks == 'database') tags = {
-        database: 'DATABASE'
-      }
-      if (teks == 'downloader') tags = {
-        downloader: 'DOWNLOADER'
-      }
-      if (teks == 'effect') tags = {
-        effect: 'EFFECT'
-      }
-      if (teks == 'fun') tags = {
-        fun: 'FUN'
-      }
-      if (teks == 'game') tags = {
-        game: 'GAME'
-      }
-      if (teks == 'group') tags = {
-        group: 'GROUP'
-      }
-      if (teks == 'info') tags = {
-        info: 'INFO'
-      }
-      if (teks == 'internet') tags = {
-        internet: 'INTERNET'
-      }
-      if (teks == 'maker') tags = {
-        maker: 'MAKER'
-      }
-      if (teks == 'owner') tags = {
-        owner: 'OWNER'
-      }
-      if (teks == 'sticker') tags = {
-        sticker: 'STICKER'
-      }
-      if (teks == 'tools') tags = {
-        tools: 'TOOLS'
-      }
-      if (teks == 'xp') tags = {
-        xp: 'USER INFO'
-      }
-      if (teks == 'voice') tags = {
-        voice: 'VOICE'
-      }
-
-      let package = JSON.parse(await fs.promises.readFile(path.join(__dirname, '../package.json')).catch(_ => '{}'))
-      let { exp, limit, level, role } = db.data.users[m.sender]
-      let { min, xp, max } = levelling.xpRange(level, global.multiplier)
-      let name = conn.getName(m.sender)
-      let d = new Date(new Date() + 3600000)
-      let locale = 'id'
-      // d.getTimeZoneOffset()
-      // Offset -420 is 18.00
-      // Offset    0 is  0.00
-      // Offset  420 is  7.00
-      let wib = moment.tz('Asia/Jakarta').format('HH:mm:ss')
-      let wita = moment.tz('Asia/Makassar').format('HH:mm:ss')
-      let wit = moment.tz('Asia/Jayapura').format('HH:mm:ss')
-      let weton = ['pahing', 'pon', 'wage', 'kliwon', 'legi'][Math.floor(d / 84600000) % 5]
-      let week = d.toLocaleDateString(locale, {
-        weekday: 'long'
-      })
-      let date = d.toLocaleDateString(locale, {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-      let dateIslamic = Intl.DateTimeFormat(locale + '-TN-u-ca-islamic', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      }).format(d)
-      let time = d.toLocaleTimeString(locale, {
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-      })
-      let _uptime = process.uptime() * 1000
-      let _muptime
-      if (process.send) {
-        process.send('uptime')
-        _muptime = (await new Promise((resolve) => {
-          process.once('message', resolve)
-          setTimeout(resolve, 1000)
-        })) * 1000
-      }
-      let muptime = clockString(_muptime)
-      let uptime = clockString(_uptime)
-      let totalreg = Object.keys(db.data.users).length
-      let rtotalreg = Object.values(db.data.users).filter((user) => user.registered == true).length
-      let help = Object.values(plugins).filter((plugin) => !plugin.disabled).map((plugin) => {
-        return {
-          help: Array.isArray(plugin.tags) ? plugin.help : [plugin.help],
-          tags: Array.isArray(plugin.tags) ? plugin.tags : [plugin.tags],
-          prefix: 'customPrefix' in plugin,
-          limit: plugin.limit,
-          premium: plugin.premium,
-          enabled: !plugin.disabled,
+      const style = setting.style
+      const local_size = fs.existsSync('./database.json') ? await Func.getSize(fs.statSync('./database.json').size) : ''
+      const message = setting.msg
+        .replace('+tag', `@${m.sender.replace(/@.+/g, '')}`)
+        .replace('+name', m.name)
+        .replace('+greeting', Func.greeting())
+        .replace('+db', (/mongo/.test(global.databaseurl) ? 'MongoDB' : /postgresql/.test(global.databaseurl) ? 'PostgreSQL' : `Local : ${local_size}`))
+        .replace('+bail', `${await Func.getBaileys('./package.json')}`)
+        .replace('+version', `${require('../package.json').version}`);
+      if (style === 1) {
+        let filter = Object.entries(global.plugins).filter(([_, obj]) => obj.help)
+        let cmd = Object.fromEntries(filter)
+        let category = {}
+        for (let name in cmd) {
+          let obj = cmd[name]
+          if (!obj) continue
+          if (!obj.tags || setting.hidden.includes(obj.tags[0])) continue
+          if (!category[obj.tags[0]]) {
+            category[obj.tags[0]] = []
+          }
+          let usageList = obj.help.constructor.name === 'Array' ? obj.help : [obj.help]
+          usageList.forEach(usage => {
+            if (!category[obj.tags[0]].some(item => item.usage === usage)) {
+              category[obj.tags[0]].push({
+                usage: usage,
+                use: obj.use ? Func.texted('bold', obj.use) : ''
+              })
+            }
+          })
         }
-      })
-      if (teks == '404') {
-        let caption = `Oh hi @${m.sender.replace(/@.+/g, '')}👋!\n`
-        caption += `I am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.\n\n`
-        caption += `> ◎ *Library* : Baileys ${await Func.getBaileys('./package.json')}\n`
-        caption += `> ◎ *Version* : ${require('../package.json').version}\n`
-        caption += `> ◎ *Rest API* : https://api.ssateam.my.id\n`
-        caption += `> ◎ *Source* : https://github.com/Im-Dims/kasumi-bot\n\n`
-        caption += `If you find an error or want to upgrade premium plan contact the owner.\n\n`
-        caption += `┌  ∘  ${_p + command} anonymous\n`
-        caption += `│  ∘  ${_p + command} database\n`
-        caption += `│  ∘  ${_p + command} downloader\n`
-        caption += `│  ∘  ${_p + command} effect\n`
-        caption += `│  ∘  ${_p + command} fun\n`
-        caption += `│  ∘  ${_p + command} game\n`
-        caption += `│  ∘  ${_p + command} group\n`
-        caption += `│  ∘  ${_p + command} info\n`
-        caption += `│  ∘  ${_p + command} internet\n`
-        caption += `│  ∘  ${_p + command} maker\n`
-        caption += `│  ∘  ${_p + command} owner\n`
-        caption += `│  ∘  ${_p + command} sticker\n`
-        caption += `│  ∘  ${_p + command} tools\n`
-        caption += `│  ∘  ${_p + command} xp\n`
-        caption += `└  ∘  ${_p + command} voice`
-        return conn.sendFMessage(m.chat, "", caption.trim(), global.set.footer, setting.cover, m)
+        const keys = Object.keys(category).sort()
+        let print = message
+        print += '\n' + String.fromCharCode(8206).repeat(4001)
+        for (let k of keys) {
+          print += '\n\n乂  *' + k.toUpperCase().split('').join(' ') + '*\n\n'
+          let commands = category[k].filter(v => v.usage).sort((a, b) => a.usage.localeCompare(b.usage))
+          print += commands.map(v => `	◦  ${_p + v.usage} ${v.use}`).join('\n')
+        }
+        conn.sendMessageModify(m.chat, print + '\n\n' + global.set.footer, m, {
+          ads: false,
+          largeThumb: true,
+          thumbnail: setting.cover,
+          url: setting.link
+        })
+      } else if (style === 2) {
+        let filter = Object.entries(global.plugins).filter(([_, obj]) => obj.help)
+        let cmd = Object.fromEntries(filter)
+        let category = {}
+        for (let name in cmd) {
+          let obj = cmd[name]
+          if (!obj) continue
+          if (!obj.tags || setting.hidden.includes(obj.tags[0])) continue
+          if (!category[obj.tags[0]]) {
+            category[obj.tags[0]] = []
+          }
+          let usageList = obj.help.constructor.name === 'Array' ? obj.help : [obj.help]
+          usageList.forEach(usage => {
+            if (!category[obj.tags[0]].some(item => item.usage === usage)) {
+              category[obj.tags[0]].push({
+                usage: usage,
+                use: obj.use ? Func.texted('bold', obj.use) : ''
+              })
+            }
+          })
+        }
+        const keys = Object.keys(category).sort()
+        let print = message
+        print += '\n' + String.fromCharCode(8206).repeat(4001)
+        for (let k of keys) {
+          print += '\n\n –  *' + k.toUpperCase().split('').join(' ') + '*\n\n'
+          let commands = category[k].filter(v => v.usage).sort((a, b) => a.usage.localeCompare(b.usage))
+          print += commands.map((v, i) => {
+            if (i == 0) {
+              return `┌  ◦  ${_p + v.usage} ${v.use}`
+            } else if (i == commands.length - 1) {
+              return `└  ◦  ${_p + v.usage} ${v.use}`
+            } else {
+              return `│  ◦  ${_p + v.usage} ${v.use}`
+            }
+          }).join('\n')
+        }
+        conn.sendMessageModify(m.chat, print + '\n\n' + global.set.footer, m, {
+          ads: false,
+          largeThumb: true,
+          thumbnail: setting.cover,
+          url: setting.link
+        })
+      } else if (style === 3) {
+        if (text) {
+          let cmd = Object.entries(global.plugins).filter(([_, v]) => v.help && v.tags && v.tags.includes(text.trim().toLowerCase()) && !setting.hidden.includes(v.tags[0]))
+          if (cmd.length === 0) {
+            return m.reply(`The category “${text.trim()}” was not found.`)
+          }
+          let commands = []
+          cmd.forEach(([_, v]) => {
+            if (v.help) {
+              if (Array.isArray(v.help)) {
+                v.help.forEach(x => {
+                  commands.push({
+                    usage: x,
+                    use: v.use ? Func.texted('bold', v.use) : ''
+                  })
+                })
+              } else {
+                commands.push({
+                  usage: v.help,
+                  use: v.use ? Func.texted('bold', v.use) : ''
+                })
+              }
+            }
+          })
+          commands = commands.filter((v, i, self) => i === self.findIndex((t) => (t.usage === v.usage))).sort((a, b) => a.usage.localeCompare(b.usage))
+          let print = commands.map((v, i) => {
+            if (i == 0) {
+              return `┌  ◦  ${_p + v.usage} ${v.use}`
+            } else if (i == commands.length - 1) {
+              return `└  ◦  ${_p + v.usage} ${v.use}`
+            } else {
+              return `│  ◦  ${_p + v.usage} ${v.use}`
+            }
+          }).join('\n')
+          m.reply(print)
+        } else {
+          let print = message
+          print += '\n' + String.fromCharCode(8206).repeat(4001) + '\n'
+          let category = {}
+          Object.entries(global.plugins).forEach(([name, obj]) => {
+            if (obj.help && obj.tags && !setting.hidden.includes(obj.tags[0])) {
+              if (!category[obj.tags[0]]) {
+                category[obj.tags[0]] = []
+              }
+              if (!category[obj.tags[0]].some(item => item.usage === obj.help)) {
+                if (Array.isArray(obj.help)) {
+                  obj.help.forEach(x => category[obj.tags[0]].push({ usage: x, use: obj.use ? Func.texted('bold', obj.use) : '' }))
+                } else {
+                  category[obj.tags[0]].push({ usage: obj.help, use: obj.use ? Func.texted('bold', obj.use) : '' })
+                }
+              }
+            }
+          })
+          const keys = Object.keys(category).sort()
+          print += keys.map((v, i) => {
+            if (i == 0) {
+              return `┌  ◦  ${_p + command} ${v}`
+            } else if (i == keys.length - 1) {
+              return `└  ◦  ${_p + command} ${v}`
+            } else {
+              return `│  ◦  ${_p + command} ${v}`
+            }
+          }).join('\n')
+          conn.sendMessageModify(m.chat, print + '\n\n' + global.set.footer, m, {
+            ads: false,
+            largeThumb: true,
+            thumbnail: setting.cover,
+            url: setting.link
+          })
+        }
+      } else if (style === 4) {
+        if (text) {
+          let cmd = Object.entries(global.plugins).filter(([_, v]) => v.help && v.tags && v.tags.includes(text.trim().toLowerCase()) && !setting.hidden.includes(v.tags[0]))
+          if (cmd.length === 0) {
+            return m.reply(`The category “${text.trim()}” was not found.`)
+          }
+          let commands = []
+          cmd.forEach(([_, v]) => {
+            if (v.help) {
+              if (Array.isArray(v.help)) {
+                v.help.forEach(x => {
+                  commands.push({
+                    usage: x,
+                    use: v.use ? Func.texted('bold', v.use) : ''
+                  })
+                })
+              } else {
+                commands.push({
+                  usage: v.help,
+                  use: v.use ? Func.texted('bold', v.use) : ''
+                })
+              }
+            }
+          })
+          commands = commands.filter((v, i, self) => i === self.findIndex((t) => (t.usage === v.usage))).sort((a, b) => a.usage.localeCompare(b.usage))
+          let print = commands.map((v, i) => {
+            if (i == 0) {
+              return `┌  ◦  ${_p + v.usage} ${v.use}`
+            } else if (i == commands.length - 1) {
+              return `└  ◦  ${_p + v.usage} ${v.use}`
+            } else {
+              return `│  ◦  ${_p + v.usage} ${v.use}`
+            }
+          }).join('\n')
+          m.reply(print)
+        } else {
+          let print = message
+          print += '\n' + String.fromCharCode(8206).repeat(4001) + '\n'
+          let category = {}
+          Object.entries(global.plugins).forEach(([name, obj]) => {
+            if (obj.help && obj.tags && !setting.hidden.includes(obj.tags[0])) {
+              if (!category[obj.tags[0]]) {
+                category[obj.tags[0]] = []
+              }
+              if (!category[obj.tags[0]].some(item => item.usage === obj.help)) {
+                if (Array.isArray(obj.help)) {
+                  obj.help.forEach(x => category[obj.tags[0]].push({ usage: x, use: obj.use ? Func.texted('bold', obj.use) : '' }))
+                } else {
+                  category[obj.tags[0]].push({ usage: obj.help, use: obj.use ? Func.texted('bold', obj.use) : '' })
+                }
+              }
+            }
+          })
+          const keys = Object.keys(category).sort()
+          let sections = []
+          const label = {
+            highlight_label: 'Many Used'
+          }
+          keys.sort((a, b) => a.localeCompare(b)).forEach((v, i) => sections.push({
+            ...(/download|conver|util/.test(v) ? label : {}),
+            rows: [{
+              title: Func.ucword(v),
+              description: `There are ${Func.arrayJoin(Object.entries(global.plugins).filter(([_, x]) => x.help && x.tags && x.tags.includes(v.trim().toLowerCase())).map(([_, x]) => x.help)).length} commands`,
+              id: `${_p + command} ${v}`
+            }]
+          }))
+          const buttons = [{
+            name: 'single_select',
+            buttonParamsJson: JSON.stringify({
+              title: 'Tap Here!',
+              sections
+            })
+          }]
+          conn.sendIAMessage(m.chat, buttons, m, {
+            header: '',
+            content: print,
+            footer: global.set.footer,
+            media: setting.cover,
+            mediaType: 'image'
+          })
+        }
       }
-      let groups = {}
-      for (let tag in tags) {
-        groups[tag] = []
-        for (let plugin of help)
-          if (plugin.tags && plugin.tags.includes(tag))
-            if (plugin.help) groups[tag].push(plugin)
-        //for (let tag of plugin.tags)
-        //if (!(tag in tags)) tags[tag] = tag
-      }
-
-      //conn.menu = conn.menu ? conn.menu: {}
-      let before = conn.menu.before || defaultMenu.before
-      let header = conn.menu.header || defaultMenu.header
-      let body = conn.menu.body || defaultMenu.body
-      let footer = conn.menu.footer || defaultMenu.footer
-      let after = conn.menu.after || (conn.user.jid == conn.user.jid ? '' : `Powered by https://wa.me/${conn.user.jid.split`@`[0]}`) + defaultMenu.after
-      let _text = [
-        before,
-        ...Object.keys(tags).map(tag => {
-          return header.replace(/%category/g, tags[tag]) + '\n' + [
-            ...help.filter(menu => menu.tags && menu.tags.includes(tag) && menu.help).map(menu => {
-              return menu.help.map(help => {
-                return body.replace(/%cmd/g, menu.prefix ? help : '%p' + help).replace(/%islimit/g, menu.limit ? 'Ⓛ' : '').replace(/%isPremium/g, menu.premium ? 'Ⓟ' : '').trim()
-              }).join('\n')
-            }), footer
-          ].join('\n')
-        }), after
-      ].join('\n')
-      let text = typeof conn.menu == 'string' ? conn.menu : typeof conn.menu == 'object' ? _text : ''
-      let replace = {
-        '%': '%', p: _p, uptime, muptime, me: conn.user.name, npmname: package.name, npmdesc: package.description, version: package.version, exp: exp - min, maxexp: xp, totalexp: exp, xp4levelup: max - exp, github: package.homepage ? package.homepage.url || package.homepage : '[unknown github url]', level, limit, name, weton, week, date, dateIslamic, time, totalreg, rtotalreg, role, readmore: readMore
-      }
-      text = text.replace(new RegExp(`%(${Object.keys(replace).sort((a, b) => b.length - a.length).join`|`})`, 'g'), (_, name) => '' + replace[name])
-      m.reply(text.trim())
+    } catch (e) {
+      conn.reply(m.chat, Func.jsonFormat(e), m)
     }
-  } catch (e) {
-    console.log(e)
-    conn.reply(m.chat, Func.jsonFormat(e), m)
-  }
-}
-handler.command = /^(menu|help|\?)$/i
-handler.exp = 3
-
-module.exports = handler
-
-const more = String.fromCharCode(8206)
-const readMore = more.repeat(4001)
-
-function clockString(ms) {
-  let h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
-  let m = isNaN(ms) ? '--' : Math.floor(ms / 60000) % 60
-  let s = isNaN(ms) ? '--' : Math.floor(ms / 1000) % 60
-  return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
+  },
+  command: /^(menu|help)$/i,
+  exp: 3
 }
