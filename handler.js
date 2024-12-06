@@ -51,6 +51,7 @@ module.exports = {
           if (!('role' in user)) user.role = 'Beginner'
           if (!('autolevelup' in user)) user.autolevelup = true
           if (!isNumber(user.hit)) user.hit = 0
+          if (!isNumber(user.today)) user.today = 0
           if (!isNumber(user.lastseen)) user.lastseen = 0
           if (!isNumber(user.usebot)) user.usebot = 0
 
@@ -90,6 +91,7 @@ module.exports = {
           role: 'Beginner',
           autolevelup: true,
           hit: 0,
+          today: 0,
           lastseen: 0,
           usebot: 0,
 
@@ -162,6 +164,8 @@ module.exports = {
           if (!'rpg' in settings) settings.rpg = false
           if (!isNumber(settings.style)) settings.style = 2
           if (!'owners' in settings) settings.owners = ['62895385006567', '254775904257']
+          if (!('msg' in settings)) settings.msg = 'Oh hi +tag!⁩ 👋\nI am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.\n\n> ◎ *Database* : +db\n> ◎ *Library* : Baileys +bail\n> ◎ *Version* : +version\n> ◎ *Rest API* : https://api.ssateam.my.id\n> ◎ *Source* : https://github.com/Im-Dims/kasumi-bot\n\nIf you find an error or want to upgrade premium plan contact the owner.'
+          if (!('hidden' in settings)) settings.hidden = []
           if (!'link' in settings) settings.link = 'https://whatsapp.com/channel/0029VaDs0ba1SWtAQnMvZb0U'
           if (!'cover' in settings) settings.cover = 'https://iili.io/2c1aUcQ.jpg'
         } else db.data.settings[this.user.jid] = {
@@ -174,6 +178,8 @@ module.exports = {
           rpg: false,
           style: 2,
           owners: ['62895385006567', '254775904257'],
+          msg: 'Oh hi +tag!⁩ 👋\nI am an automated system (WhatsApp Bot) that can help to do something, search and get data / information only through WhatsApp.\n\n> ◎ *Database* : +db\n> ◎ *Library* : Baileys +bail\n> ◎ *Version* : +version\n> ◎ *Rest API* : https://api.ssateam.my.id\n> ◎ *Source* : https://github.com/Im-Dims/kasumi-bot\n\nIf you find an error or want to upgrade premium plan contact the owner.',
+          hidden: [],
           link: 'https://whatsapp.com/channel/0029VaDs0ba1SWtAQnMvZb0U',
           cover: 'https://iili.io/2c1aUcQ.jpg'
         }
