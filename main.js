@@ -45,8 +45,8 @@
   })
   
   const question = (text) => new Promise((resolve) => rl.question((text), (resolve)))
-  const msgRetry = new NodeCache()
-  
+  const msgRetryCounterCache = new NodeCache()
+    
   global.API = (name, path = '/', query = {}, apikeyqueryname) => (name in global.APIs ? global.APIs[name] : name) + path + (query || apikeyqueryname ? '?' + new URLSearchParams(Object.entries({ ...query, ...(apikeyqueryname ? { [apikeyqueryname] : global.APIKeys[name in global.APIs ? global.APIs[name] : name] } : {}) })) : '') 
   global.timestamp = {
     start: new Date()
@@ -113,6 +113,7 @@
     version, 
     isLatest 
   } = await fetchLatestBaileysVersion()
+  console.log(`using WA v${version.join(".")}, isLatest: ${isLatest}`)
   const connectionOptions = {
     version: /*version*/ [2, 3000, 1015901307],
     logger: pinoh({
@@ -129,7 +130,14 @@
     defaultQueryTimeoutMs: undefined,
     //isLatest: true, // set the correct value for isLatest 
     markOnlineOnConnect: true,
-    generateHighQualityLinkPreview: true
+    generateHighQualityLinkPreview: true,
+    getMessage: async (key) => {
+      let jid = jidNormalizedUser(key.remoteJid)
+      let msg = await store.loadMessage(jid, key.id)
+      return msg?.["message"] || ''
+    },
+    msgRetryCounterCache,
+    syncFullHistory: true
   }
   
   global.conn = simple.makeWASocket(connectionOptions)
