@@ -39,10 +39,6 @@
     JSONFile
   } = low 
   
-  const Logger = pinoh({
-    level: "silent"
-  })
-  
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -119,15 +115,19 @@
   } = await fetchLatestBaileysVersion()
   const connectionOptions = {
     version: version,
-    logger: Logger,
+    logger: pinoh({
+      level: "silent"
+    }),
     auth: {
       creds: state.creds,
-      keys: makeCacheableSignalKeyStore(state.keys, Logger)
+      keys: makeCacheableSignalKeyStore(state.keys, pinoh({
+        level: "silent"
+      }))
     },
-    browser: ["Ubuntu", "Chrome", "20.0.04"],
+    browser: ["Ubuntu", "Firefox", "20.0.04"],
     printQRInTerminal: /*!opts.pairing*/ true,
     defaultQueryTimeoutMs: undefined,
-    isLatest: true, // set the correct value for isLatest 
+    //isLatest: true, // set the correct value for isLatest 
     markOnlineOnConnect: true,
     generateHighQualityLinkPreview: true
   }
