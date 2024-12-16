@@ -5,8 +5,8 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
   let user = db.data.users[m.sender]
   if (user.registered === true) return m.reply(`Your number has been registered, if you want to re-register, send it ${usedPrefix + command} sn`)
   if (!Reg.test(text)) return m.reply(Func.example(usedPrefix, command, 'kasumi.15'))
-  if (name == 'kasumi') return conn.reply(m.chat, Func.texted('bold', 'Kenapa make namaku om??'), m)
   let [_, name, splitter, age] = text.match(Reg)
+  if (name == 'kasumi') return conn.reply(m.chat, Func.texted('bold', 'Kenapa make namaku om??'), m)
   if (!name) return m.reply('Enter your name')
   if (!age) return m.reply('Enter your age')
   age = parseInt(age)
@@ -29,7 +29,7 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
   teks += `+ 100 limit\n`
   teks += `+ 20.000 exp\n`
   teks += `+ 10.000 money\n\n`
-  tekz += global.set.footer 
+  teks += global.set.footer 
   m.reply(teks)
 }
 handler.help = ['register'].map((v) => v + '')
