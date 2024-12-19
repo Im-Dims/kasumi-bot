@@ -8,7 +8,7 @@
 
 ### Set in config.js
 ```Javascript
-global.owner = ['62895385006567']
+global.owner = ['6281398274790']
 global.owner_name = 'Dimas Triyatno'
 
 global.APIs = {
@@ -39,7 +39,7 @@ global.media = {
 }
 
 global.databaseurl = ''
-global.pairingNumber = 62895385006567
+global.pairingNumber = 6281398274790
 
 global.multiplier = 7 
 global.max_upload = 70
