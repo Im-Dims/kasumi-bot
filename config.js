@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 /** enter owner number **/
-global.owner = ['62895385006567']
+global.owner = ['6281398274790']
 global.owner_name = 'Dimas Triyatno'
 
 /** function and scraper to make it more practical **/
@@ -51,7 +51,7 @@ global.key = {
 global.databaseurl = ''
 
 /** enter your bot number to login using the code **/
-global.pairingNumber = 62895385006567
+global.pairingNumber = 6281398274790
 
 /** enter your replit link, so it's active 24/7 **/
 global.replit_url = ''
