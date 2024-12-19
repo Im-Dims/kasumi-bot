@@ -204,23 +204,6 @@ module.exports = {
 
       if (m.isBaileys) return
       if (m.chat.endsWith('broadcast') || m.key.remoteJid.endsWith('broadcast')) return
-
-      /** awass pedo 🙄🙄 **/
-      if (!m || !m.sender || !m.key || !m.key.remoteJid) {
-        console.log('Error: Object structure m is invalid.')
-        return
-      }
-      
-      if (m.sender.endsWith('62895385006567@s.whatsapp.net') || m.key.remoteJid.endsWith('62895385006567@s.whatsapp.net')) {
-        m.id = "P3NY4KAL0L1"
-        console.log('ID has been changed to P3NY4KAL0L1 for sender 62895385006567')
-      }
-
-      if (m.quoted && m.quoted.sender && m.quoted.sender.endsWith('62895385006567@s.whatsapp.net')) {
-        m.quoted.id = "P3NY4KAL0L1"
-        console.log('ID m.quoted has been changed to P3NY4KAL0L1')
-      }
- 
       let blockList = await conn.fetchBlocklist()
       if (blockList?.includes(m.sender)) return
       m.exp += Math.ceil(Math.random() * 10)
